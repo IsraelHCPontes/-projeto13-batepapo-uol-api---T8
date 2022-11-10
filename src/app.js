@@ -42,8 +42,17 @@ app.post("/participants", async (req,res) => {
             time: time});
 
         res.sendStatus(201)   
-    }catch{
+    }catch(err){
         return res.sendStatus(422);
+    }
+})
+
+app.get("/participants", async (req, res) =>{
+    try{
+        const users = await db.collection('users').find().toArray();
+        return res.send(users)
+    }catch(err){
+        return res.send(err);
     }
 })
 
