@@ -28,7 +28,7 @@ app.post("/participants", async (req,res) => {
          const already = await db.collection("users").findOne({name});
 
         if(already){
-            res.status(409).send({erro: "Usuário já cadastrado!"});
+            res.status(409).send({err: "Usuário já cadastrado!"});
             return
         }
 
@@ -56,5 +56,23 @@ app.get("/participants", async (req, res) =>{
     }
 })
 
+app.post("/messages", async(req, res) => {
+    try{
+        const {to, text, type} = req.body;
+        const {user} = req.headers;
+        let time = dayjs().format('HH.mm.ss')
+        await db.collection('messages').insertOne({
+            from: user,
+            to: "Maria",
+            text: "oi sumida rs",
+            type: "private_message",
+            time
+        })
+
+        return res.sendStatus(201);
+    }catch(err){
+        return res.sendStatus(422)
+    }
+})
 
 app.listen(5001, () => console.log('Ouvindo na porta 5001'))
