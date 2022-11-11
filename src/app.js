@@ -32,7 +32,7 @@ try{
     await mongoClient.connect();
     db = mongoClient.db("batePapoUol");
 }catch(err){
-    console.log(err)
+    console.log(err);
 }
 
 app.post("/participants", async (req,res) => {
@@ -41,8 +41,8 @@ app.post("/participants", async (req,res) => {
     const validation = userSchema.validate(user,{abortEarly: false});
     
     if(validation.error){
-        const erros = validation.error.details.map(detail => detail.message)
-        return res.status(422).send(erros)
+        const erros = validation.error.details.map(detail => detail.message);
+        return res.status(422).send(erros);
     }
 
     try{
@@ -64,7 +64,7 @@ app.post("/participants", async (req,res) => {
             type: 'status',
             time: time});
 
-        res.sendStatus(201)   
+        res.sendStatus(201);   
     }catch(err){
         return res.status(422).send(err);
     }
@@ -73,7 +73,7 @@ app.post("/participants", async (req,res) => {
 app.get("/participants", async (req, res) =>{
     try{
         const users = await db.collection('users').find().toArray();
-        return res.send(users)
+        return res.send(users);
     }catch(err){
         return res.send(err);
     }
@@ -82,13 +82,13 @@ app.get("/participants", async (req, res) =>{
 app.post("/messages", async(req, res) => {
     const { to, text, type }= req.body;
     const {user} = req.headers;
-    let time = dayjs().format('HH.mm.ss')
+    let time = dayjs().format('HH.mm.ss');
     const message = {  
         from: user,
         to,
         text,
         type,
-        time}
+        time};
     
     const validation = messageSchema.validate(message, {abortEarly: false});
 
@@ -110,7 +110,7 @@ app.post("/messages", async(req, res) => {
     }catch(err){
         return res.status(422).send(err);
     }
-})
+});
 
 app.get("/messages", async (req, res) => {
     const limit  = parseInt(req.query.limit);
@@ -121,7 +121,7 @@ app.get("/messages", async (req, res) => {
     const filtradas = messages.filter(message =>{
         const {from, to, type} = message;
         if(from === user || to === user || to === 'Todos' || type === 'message'){
-            return true
+            return true;
         }})
 
     if(limit){
@@ -133,7 +133,7 @@ app.get("/messages", async (req, res) => {
    }catch(err){
     res.status(500).send(err.message);
    }
-})
+});
 
 
 app.post("/status", async (req, res) => {
@@ -151,7 +151,7 @@ app.post("/status", async (req, res) => {
     }catch(err){
         res.sendStatus(500);
     }
-})
+});
 
 app.delete("/messages/:id", async (req, res) =>{
     const {user} = req.headers;
@@ -172,9 +172,51 @@ app.delete("/messages/:id", async (req, res) =>{
     }catch(err){
         res.send({error: err});
     }
+});
 
+app.put("/messages/:id", async (req, res) => {
+    const { to, text, type }= req.body;
+    const {user} = req.headers;
+    const {id} = req.params;
+    let time = dayjs().format('HH.mm.ss');
+    const message = {  
+        from: user,
+        to,
+        text,
+        type,
+        time
+    };
 
-})
+        const validation = messageSchema.validate(message, {abortEarly: false});
+
+        if(validation.error){
+            return res.status(422).send(validation.error.details);
+        }
+
+        try{
+            const already = await db.collection('users').findOne({name: user});
+            const idAlready = await db.collection('messages').findOne({_id: ObjectId(id)});
+
+            if(!already){
+                return res.status(422).send(user);
+            }
+
+            if(!idAlready){
+                return res.sendStatus(404);
+            }
+
+            if(idAlready.from !== user){
+                return res.sendStatus(401);
+            }
+
+            await db.collection('messages').updateOne({_id: ObjectId(idAlready._id)}, {$set:message});
+
+            res.sendStatus(201);
+             
+        }catch(err){
+            res.status(500).send('érro aqui');
+        }
+});
 
 setInterval( async () =>{
     const timeLimit = Date.now() - 10 * 1000;
