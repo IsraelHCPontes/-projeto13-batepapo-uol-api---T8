@@ -117,9 +117,9 @@ app.get("/messages", async (req, res) => {
     const messages = await db.collection('messages').find().toArray();
     const filtradas = messages.filter(message =>{
         const {from, to, type} = message;
-        const toUser = from === user || to === user || to === 'todos';
-        const publicS = type === 'message'
-        return toUser || publicS;})
+        if(from === user || to === user || to === 'todos' || type === 'message'){
+            return true
+        }})
 
     if(limit){
         return res.send(filtradas.slice(-limit));
@@ -132,4 +132,5 @@ app.get("/messages", async (req, res) => {
    }
 })
 
-app.listen(5001, () => console.log('Ouvindo na porta 5001'))
+app.listen(process.env.PORT, () =>
+ console.log(`Ouvindo na porta: ${process.env.PORT}`))
