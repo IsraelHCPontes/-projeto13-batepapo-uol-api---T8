@@ -239,6 +239,7 @@ setInterval( async () =>{
                 await db.collection('messages').insertOne(message);   
             })
         }
+        res.sendStatus(200);
     }catch(err){
         res.status(500).send({error: err });
     }
