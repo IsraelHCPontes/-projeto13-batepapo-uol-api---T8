@@ -1,7 +1,7 @@
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
-import { MongoClient, ObjectId, ReturnDocument } from 'mongodb';
+import { MongoClient, ObjectId } from 'mongodb';
 import dayjs from 'dayjs';
 import joi from 'joi';
 
@@ -18,9 +18,7 @@ const messageSchema = joi.object({
     time: joi.string().required()
 })
 
-
-
-//configs
+//Configs
 const app = express();
 app.use(cors());
 app.use(express.json());
@@ -30,7 +28,7 @@ let db;
 
 try{
     await mongoClient.connect();
-    db = mongoClient.db("batePapoUol");
+    db =  mongoClient.db("batePapoUol");
 }catch(err){
     console.log(err);
 }
@@ -135,12 +133,12 @@ app.get("/messages", async (req, res) => {
    }
 });
 
-
 app.post("/status", async (req, res) => {
     const {user} = req.headers;
     
     try{
         const already = await db.collection('users').findOne({name:user});
+       
         if(!already){
             return res.sendStatus(404);
         }
@@ -244,7 +242,7 @@ setInterval( async () =>{
     }catch(err){
         res.status(500).send({error: err });
     }
-}, 150000)//LEMBRAR DE VOLTAR PRA 15SEG
+}, 15000)//LEMBRAR DE VOLTAR PRA 15SEG
 
 app.listen(process.env.PORT, () =>
  console.log(`Ouvindo na porta: ${process.env.PORT}`));
